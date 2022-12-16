@@ -9,7 +9,24 @@ block_size=20
 fps=15
 direction="right"
 applethick=30
-
+test=True
+while test:
+  try:
+    inFile = open('scores', 'r')
+    lin= inFile.readlines()
+    line=int(lin[-1])
+  except IndexError:
+    filehandle = open('scores','w')
+    filehandle.write("0")
+    filehandle.close()
+    continue
+  except ValueError:
+    filehandle = open('scores','w')
+    filehandle.write("0")
+    filehandle.close()
+  else:
+    break
+  
 
 green=(0,155,0)
 gamedisplay = display.set_mode((display_width,display_height))
@@ -21,17 +38,39 @@ smallfont=pygame.font.SysFont("comicsansms",25)
 medfont=pygame.font.SysFont("comicsansms",50)
 largefont=pygame.font.SysFont("comicsansms",80)
 
+def pause():
+  paused=True
+  while paused:
+    for event in pygame.event.get():
+      if event.type==pygame.QUIT:
+        display.quit()
+        quit()
+      if event.type ==pygame.KEYDOWN:
+        if event.key==pygame.K_c:
+          paused=False
+        elif event.key==pygame.K_q:
+          display.quit()
+          quit()
+    
+
 def highscore(score):
-  if highscore>score:
-    text=smallfont.render("highscore: "+str(highscore),True,Color('black'))
-    gamedisplay.blit(text,[0,10])
-  if highscore<score:
-    highscore=score
-    text=smallfont.render("highscore: "+str(highscore),True,Color('black'))
-    gamedisplay.blit(text,[0,10])
+  inFile = open('scores', 'r')
+  lin= inFile.readlines()
+  line=int(lin[-1])
+  if score>line:
+    filehandle = open('scores','w')
+    filehandle.write(str(score))
+    filehandle.close()
+    text=smallfont.render("highscore: "+str(score),True,Color('black'))
+    gamedisplay.blit(text,[0,15])
+  elif score<=line:
+    text=smallfont.render("highscore: "+str(line), True, Color('black'))
+    gamedisplay.blit(text,[0,15])
+  
 def score(score):
   text=smallfont.render("score: "+str(score),True,Color('black'))
   gamedisplay.blit(text,[0,0])
+
   
 
 def rand_apple():
@@ -104,6 +143,7 @@ def gameloop():
   
   snakelist=[]
   snakelength=1
+
   
   applex,appley=rand_apple()
   while not exit:
@@ -168,10 +208,10 @@ def gameloop():
       for eachsegment in snakelist[:-1]:
         if eachsegment==snakehead:
           gameover=True
-          
+      
       snake(block_size,snakelist)
       score(snakelength-1)
-      highscore(score)
+      highscore(snakelength-1)
       display.update()
       
 
@@ -183,7 +223,7 @@ def gameloop():
           applex,appley=rand_apple()
           snakelength+=1
       clock.tick(fps)
-    
+
   quit()
 game_intro()
 gameloop()
